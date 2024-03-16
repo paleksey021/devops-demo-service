@@ -1,0 +1,35 @@
+
+name: CI Process
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install Poetry
+      run: pip install poetry
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Run tests
+      run: poetry run python manage.py test
+      working-directory: ./devops_demo
+
+    - name: Build Docker image
+      if: success()
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: paleksey021/devopsapp:latest
